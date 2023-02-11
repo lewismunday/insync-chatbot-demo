@@ -1,9 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import '../App.css';
 import context from '../tools/utils';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import {Button} from "react-bootstrap";
 
 // OpenAI Configuration
 const { Configuration, OpenAIApi } = require("openai");
