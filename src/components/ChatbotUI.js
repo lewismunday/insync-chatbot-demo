@@ -32,11 +32,18 @@ const ChatbotUI = () => {
     ]);
     const [inputValue, setInputValue] = React.useState('');
 
+    const fillQuestions = (e) => {
+        setInputValue(e.target.innerText);
+    }
+
     const handleSubmit = async event => {
         event.preventDefault();
         const newMessages = [...messages, { message: inputValue, user: true }];
         setMessages(newMessages);
         setInputValue('');
+
+        // Show typing indicator
+        document.querySelector('.typing').style.display = 'block';
 
         const resultString = messages.reduce((acc, message) => {
             if (message.user) {
@@ -71,6 +78,8 @@ const ChatbotUI = () => {
             presence_penalty: 0.6,
         });
         setMessages([...newMessages, {message: response.data.choices[0].text, user: false}]);
+        // Hide typing indicator
+        document.querySelector('.typing').style.display = 'none';
     };
 
     function onTextAreaEnterPress(e) {
@@ -96,6 +105,7 @@ const ChatbotUI = () => {
                     <ChatMessage key={index} message={message.message} user={message.user} />
                 ))}
             </div>
+            <p className="typing" style={{display: "none"}}>Ila is typing...</p>
             <div ref={bottomRef} />
         </div>
             <form onSubmit={handleSubmit} className="App">
@@ -110,6 +120,12 @@ const ChatbotUI = () => {
                 />
                 {/*<button type="submit">Send</button>*/}
             </form>
+            <div className="App">
+                <h3>Click the button below to see an example of how Ila can help you</h3>
+                <button type="submit" onClick={fillQuestions}>Tell me about Insync Insurance</button>
+                <button type="submit" onClick={fillQuestions}>Tell me about D&O insurance</button>
+                <button type="submit" onClick={fillQuestions}>Explain the need of insurance as if you were talking to a 5 year old</button>
+            </div>
         </div>
     );
 };
