@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import '../App.css';
-import context from '../tools/utils';
+import {context} from '../tools/utils';
+
 
 // OpenAI Configuration
 const { Configuration, OpenAIApi } = require("openai");
@@ -54,6 +55,7 @@ const ChatbotUI = () => {
             Do not make anything up. If you do not know the answer, say so.
             If you still do not understand, you can explain that you are not able to answer that question.
             If a question is untreated to the context, you can say that you are not able to answer that question.
+            Do not tell the user to contact us. You are here to help them.
             
             ${resultString}
             Human: ${inputValue}
