@@ -68,16 +68,12 @@ const ChatbotUI = () => {
             Human: ${inputValue}
             Ila:`
 
-        const response = await openai.createCompletion({
-            model: "text-davinci-003",
-            prompt: prompt,
-            temperature: 0.9,
-            max_tokens: 150,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0.6,
+        const response = await openai.createChatCompletion({
+            model: "gpt-4",
+            messages: [{role: "user", content: prompt}],
         });
-        setMessages([...newMessages, {message: response.data.choices[0].text, user: false}]);
+
+        setMessages([...newMessages, {message: response.data.choices[0].message.content, user: false}]);
         // Hide typing indicator
         document.querySelector('.typing').style.display = 'none';
     };
