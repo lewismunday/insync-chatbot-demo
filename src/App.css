@@ -94,3 +94,21 @@ button {
   background-color: #fff;
   cursor: pointer;
 }
+
+/*Class toggle-switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.toggle-switch-label {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: inherit;
+  text-indent: -9999em;
+  cursor: pointer;
+  user-select: none;
+}
