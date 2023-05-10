@@ -2,6 +2,8 @@ import React, {useEffect, useRef} from 'react';
 import '../App.css';
 import {context} from '../tools/utils';
 import {ThreeDots} from 'react-loader-spinner'
+import {Alert} from "react-bootstrap";
+import 'bootstrap/dist/css/bootstrap.css';
 
 
 
@@ -12,15 +14,20 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const ChatMessage = ({ message, user }) => (
+const ChatMessage = ({ message, user, error }) => (
     <div className={`chat-box ${user ? 'user' : ''}`}>
         <div
             className="chat-message"
-            style={{
-                backgroundColor: user ? '#e0dede' : '#FFA07A',
-                color: user ? '#000' : '#fff',
-                marginLeft: user ? 'auto' : '0'
-            }}
+            style={error ? {
+                backgroundColor: '#ff5b5b',
+                border: '2px solid red',
+                color: '#fff',
+                marginLeft: '0'
+            } : {
+                    backgroundColor: user ? '#e0dede' : '#FFA07A',
+                    color: user ? '#000' : '#fff',
+                    marginLeft: user ? 'auto' : '0'
+                }}
         >
             {message}
         </div>
@@ -30,11 +37,12 @@ const ChatMessage = ({ message, user }) => (
 const ChatbotUI = () => {
     const bottomRef = useRef(null);
     const [messages, setMessages] = React.useState([
-        { message: 'Hi there! I\'m Ila, a chatbot for Insync Insurance! How can I help you today?', user: false }
+        { message: 'Hi there! I\'m Ila, a chatbot for Insync Insurance! How can I help you today?', user: false, error: false }
     ]);
     const [inputValue, setInputValue] = React.useState('');
     let [isLoading, setIsLoading] = React.useState(false);
     const [model, setModel] = React.useState('gpt-3.5-turbo');
+    const [errorModal, setErrorModal] = React.useState(false);
 
     const fillQuestions = (e) => {
         setInputValue(e.target.innerText);
@@ -42,9 +50,10 @@ const ChatbotUI = () => {
 
     const handleSubmit = async event => {
         if (!inputValue) return;
+        setErrorModal(false)
         setIsLoading(true)
         event.preventDefault();
-        const newMessages = [...messages, { message: inputValue, user: true }];
+        const newMessages = [...messages, { message: inputValue, user: true, error: false }];
         setMessages(newMessages);
         setInputValue('');
 
@@ -73,16 +82,23 @@ const ChatbotUI = () => {
             ${resultString}
             Human: ${inputValue}
             Ila:`
+        let response = null;
+        try {
+            response = await openai.createChatCompletion({
+                model: model,
+                messages: [{role: "user", content: prompt}],
+            });
+        } catch (error) {
+            console.log(error);
+            setErrorModal(true);
+            setIsLoading(false);
+            setMessages([...newMessages, {message: 'Sorry, there\'s an issue with the response at the moment. Please try again later', user: false, error: true}]);
+            return;
+        }
 
-        const response = await openai.createChatCompletion({
-            model: model,
-            messages: [{role: "user", content: prompt}],
-        });
 
 
-        console.log(response)
-
-        setMessages([...newMessages, {message: response.data.choices[0].message.content, user: false}]);
+        setMessages([...newMessages, {message: response.data.choices[0].message.content, user: false, error: false}]);
         // Hide typing indicator
         document.querySelector('.typing').style.display = 'none';
         setIsLoading(false)
@@ -123,7 +139,7 @@ const ChatbotUI = () => {
             </div>
             <div className="chat-body">
                 {messages.map((message, index) => (
-                    <ChatMessage key={index} message={message.message} user={message.user} />
+                    <ChatMessage key={index} message={message.message} user={message.user} error={message.error}/>
                 ))}
             </div>
             <p className="typing" style={{display: "none"}}><ThreeDots
@@ -152,6 +168,11 @@ const ChatbotUI = () => {
                 {/*<button type="submit">Send</button>*/}
             </form>
             <div className="App">
+                {errorModal ? <div className="modal">
+                        <Alert variant="danger">
+                            Sorry, there is an issue connecting to the server. Please try again later!
+                        </Alert>
+                </div> : null}
                 <p style={{fontSize: 'small', color: 'red'}}>{model === "gpt-4" ? 'Please note, response time can take up to 60 seconds due to restricted server bandwidth.' : null}</p>
                 <h3>Click the button below to see an example of how Ila can help you</h3>
                 <button type="submit" onClick={fillQuestions}>Tell me about Insync Insurance</button>
